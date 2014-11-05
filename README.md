@@ -1,4 +1,4 @@
 Logger
 =======
 
-Logger
+improved logging ability
