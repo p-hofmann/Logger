@@ -1,4 +1,4 @@
-Logger
+LoggingWrapper
 =======
 
-improved logging ability
+Wrapper for the logging module
