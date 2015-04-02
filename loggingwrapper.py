@@ -72,7 +72,7 @@ class LoggingWrapper(object):
 			err_handler_file.setLevel(logging.INFO)
 			self._logger.addHandler(err_handler_file)
 		except Exception:
-			self._logger.error("Could not open %s for logging".format(filename))
+			sys.stderr.write("[LoggingWrapper] Could not open '{}' for logging\n".format(filename))
 			return
 
 
