@@ -7,7 +7,7 @@ import logging
 
 class LoggingWrapper(object):
 
-	def __init__(self, label="", verbose=True, message_format=None, stream=None):
+	def __init__(self, label="", verbose=True, message_format=None, stream=sys.stderr):
 		assert isinstance(label, basestring)
 		assert isinstance(verbose, bool)
 		assert message_format is None or isinstance(message_format, basestring)
@@ -16,7 +16,8 @@ class LoggingWrapper(object):
 
 		self._logger = logging.getLogger(label)
 		self._logger.setLevel(logging.DEBUG)
-		self.add_log_stream(stream=stream, verbose=verbose)
+		if stream is not None:
+			self.add_log_stream(stream=stream, verbose=verbose)
 		self._handler_log_file = None
 
 	def __exit__(self, type, value, traceback):
@@ -54,9 +55,7 @@ class LoggingWrapper(object):
 	def set_level(self, level):
 		self._logger.setLevel(level)
 
-	def add_log_stream(self, stream=None, verbose=True):
-		if stream is None:
-			stream = sys.stderr
+	def add_log_stream(self, stream=sys.stderr, verbose=True):
 		err_handler = logging.StreamHandler(stream)
 		err_handler.setFormatter(self.message_formatter)
 		if verbose:
