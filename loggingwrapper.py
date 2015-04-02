@@ -83,10 +83,12 @@ class LoggingWrapper(object):
 def test(log_file_path=None):
 	assert log_file_path is None or isinstance(log_file_path, basestring)
 	log1 = LoggingWrapper("l1")
-	log1.set_log_file(log_file_path)
+	if log_file_path:
+		log1.set_log_file(log_file_path)
 	log1.info("Test1")
 	log2 = LoggingWrapper("l2")
-	log2.set_log_file(log_file_path, 'a')
+	if log_file_path:
+		log2.set_log_file(log_file_path, 'a')
 	log1.info("Test2")
 	log2.info("Test1")
 	log2.info("Test2")
