@@ -1,9 +1,11 @@
 __author__ = 'hofmann'
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 import sys
 import io
+import StringIO
 import logging
+import unittest
 
 
 class LoggingWrapper(object):
@@ -34,7 +36,7 @@ class LoggingWrapper(object):
 		assert isinstance(verbose, bool)
 		assert message_format is None or isinstance(message_format, basestring)
 		assert message_format is None or isinstance(date_format, basestring)
-		assert stream is None or isinstance(stream, (file, io.FileIO))
+		assert stream is None or isinstance(stream, (file, io.FileIO, StringIO.StringIO)) or stream.__class__ is StringIO.StringIO
 
 		if message_format is None:
 			message_format = "%(asctime)s %(levelname)s: [%(name)s] %(message)s"
@@ -180,7 +182,8 @@ class LoggingWrapper(object):
 
 			@return: None
 		"""
-		assert isinstance(stream, (file, io.FileIO))
+		assert isinstance(stream, (file, io.FileIO, StringIO.StringIO)) or stream.__class__ is StringIO.StringIO
+		# assert isinstance(stream, (file, io.FileIO))
 		assert level in self._levelNames
 
 		err_handler = logging.StreamHandler(stream)
@@ -226,44 +229,64 @@ class LoggingWrapper(object):
 			return
 
 
-def test(log_file_path=None):
-	assert log_file_path is None or isinstance(log_file_path, basestring)
-	log1 = LoggingWrapper("l1")
-	if log_file_path:
-		log1.set_log_file(log_file_path)
-	log1.info("Test1")
-	log2 = LoggingWrapper("l2")
-	if log_file_path:
-		log2.set_log_file(log_file_path, 'a')
-	log1.info("Test2")
-	log2.info("Test1")
-	log2.info("Test2")
-	log2x = LoggingWrapper("l2")
-	log2x.info("Test1 X")
-	log2x.set_level(logging.CRITICAL)
-	log2x.critical("Test2 X")
-	log1.close()
-	log2.close()
-	log2x.close()
+class TestStringMethods(unittest.TestCase):
+	log_file_path = 'test_out_.txt'
 
-	if log_file_path:
-		log3 = LoggingWrapper("l3", stream=None)
-		with open(log_file_path, 'a') as log_file_handle:
-			log3.set_log_file(log_file_handle)
-			log3.info("Test1")
-			list_of_methods = [log3.info, log3.debug, log3.warning, log3.error, log3.info, log3.critical]
-			count = 2
-			for methods in list_of_methods:
-				methods("Test{}".format(count))
-				count += 1
-			try:
-				raise Exception("Test{}".format(count))
-			except Exception:
-				log3.exception("Test{}".format(count))
-		log3.close()
+	def test_output_stream(self):
+		expected_output = "{level}: [{name}] {msg}"
 
-if __name__ == "__main__":
-	if len(sys.argv) == 2:
-		test(sys.argv[1])
-	else:
-		test()
+		if not hasattr(sys.stdout, "getvalue"):
+			self.fail("need to run in buffered mode")
+
+		log1 = LoggingWrapper("l1", stream=sys.stdout)
+		if TestStringMethods.log_file_path:
+			log1.set_log_file(TestStringMethods.log_file_path)
+
+		log1.info("Test1")
+
+		log2 = LoggingWrapper("l2", stream=sys.stdout)
+		if TestStringMethods.log_file_path:
+			log2.set_log_file(TestStringMethods.log_file_path, 'a')
+
+		log2.info("Test1")
+
+		log2x = LoggingWrapper("l2", stream=sys.stdout)
+		log2x.info("Test1 X")
+		#output = sys.stdout.getvalue().strip()  # because stdout is an StringIO instance
+
+		log2x.set_level(logging.CRITICAL)
+		log2x.critical("Test2 X")
+
+		log2.close()
+		log2x.close()
+
+		sys.stdout.seek(0)
+		output = sys.stdout.readline().strip()
+		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l1", msg="Test1")), "'{}'".format(output))
+		output = sys.stdout.readline().strip()
+		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l2", msg="Test1")),  "'{}'".format(output))
+		output = sys.stdout.readline().strip()
+		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l2", msg="Test1 X")),  "'{}'".format(output))
+		output = sys.stdout.readline().strip()
+		self.assertTrue(output.endswith(expected_output.format(level='CRITICAL', name="l2", msg="Test2 X")),  "'{}'".format(output))
+
+		if TestStringMethods.log_file_path:
+			log3 = LoggingWrapper("l3", stream=None)
+			with open(TestStringMethods.log_file_path, 'a') as log_file_handle:
+				log3.set_log_file(log_file_handle)
+				log3.info("Test1")
+				list_of_methods = [log3.info, log3.debug, log3.warning, log3.error, log3.info, log3.critical]
+				count = 2
+				for methods in list_of_methods:
+					methods("Test{}".format(count))
+					count += 1
+				try:
+					raise TypeError("Test{}".format(count))
+				except TypeError:
+					log3.exception("Test{}".format(count))
+			log3.close()
+
+
+if __name__ == '__main__':
+	suite = unittest.TestLoader().loadTestsFromTestCase(TestStringMethods)
+	unittest.TextTestRunner(verbosity=2, buffer=True).run(suite)
