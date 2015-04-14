@@ -229,7 +229,7 @@ class LoggingWrapper(object):
 			return
 
 
-class TestStringMethods(unittest.TestCase):
+class TestLoggingWrapperMethods(unittest.TestCase):
 	log_file_path = 'test_out_.txt'
 
 	def test_output_stream(self):
@@ -240,14 +240,14 @@ class TestStringMethods(unittest.TestCase):
 			self.fail("need to run in buffered mode")
 
 		log1 = LoggingWrapper("l1", stream=sys.stdout)
-		if TestStringMethods.log_file_path:
-			log1.set_log_file(TestStringMethods.log_file_path)
+		if TestLoggingWrapperMethods.log_file_path:
+			log1.set_log_file(TestLoggingWrapperMethods.log_file_path)
 
 		log1.info("Test1")
 
 		log2 = LoggingWrapper("l2", stream=sys.stdout)
-		if TestStringMethods.log_file_path:
-			log2.set_log_file(TestStringMethods.log_file_path, 'a')
+		if TestLoggingWrapperMethods.log_file_path:
+			log2.set_log_file(TestLoggingWrapperMethods.log_file_path, 'a')
 
 		log2.info("Test1")
 
@@ -274,9 +274,9 @@ class TestStringMethods(unittest.TestCase):
 		self.assertTrue(output.endswith(expected_output.format(
 			level='CRITICAL', name="l2", msg="Test2 X")),  "'{}'".format(output))
 
-		if TestStringMethods.log_file_path:
+		if TestLoggingWrapperMethods.log_file_path:
 			log3 = LoggingWrapper("l3", stream=None)
-			with open(TestStringMethods.log_file_path, 'a') as log_file_handle:
+			with open(TestLoggingWrapperMethods.log_file_path, 'a') as log_file_handle:
 				log3.set_log_file(log_file_handle)
 				log3.info("Test1")
 				list_of_methods = [log3.info, log3.debug, log3.warning, log3.error, log3.info, log3.critical]
@@ -292,5 +292,5 @@ class TestStringMethods(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	suite = unittest.TestLoader().loadTestsFromTestCase(TestStringMethods)
+	suite = unittest.TestLoader().loadTestsFromTestCase(TestLoggingWrapperMethods)
 	unittest.TextTestRunner(verbosity=2, buffer=True).run(suite)
