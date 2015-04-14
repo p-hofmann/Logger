@@ -233,6 +233,7 @@ class TestStringMethods(unittest.TestCase):
 	log_file_path = 'test_out_.txt'
 
 	def test_output_stream(self):
+		# TODO: test string for both, stdout and file, then compare
 		expected_output = "{level}: [{name}] {msg}"
 
 		if not hasattr(sys.stdout, "getvalue"):
@@ -252,7 +253,6 @@ class TestStringMethods(unittest.TestCase):
 
 		log2x = LoggingWrapper("l2", stream=sys.stdout)
 		log2x.info("Test1 X")
-		#output = sys.stdout.getvalue().strip()  # because stdout is an StringIO instance
 
 		log2x.set_level(logging.CRITICAL)
 		log2x.critical("Test2 X")
@@ -262,13 +262,17 @@ class TestStringMethods(unittest.TestCase):
 
 		sys.stdout.seek(0)
 		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l1", msg="Test1")), "'{}'".format(output))
+		self.assertTrue(output.endswith(expected_output.format(
+			level='INFO', name="l1", msg="Test1")), "'{}'".format(output))
 		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l2", msg="Test1")),  "'{}'".format(output))
+		self.assertTrue(output.endswith(expected_output.format(
+			level='INFO', name="l2", msg="Test1")),  "'{}'".format(output))
 		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(level='INFO', name="l2", msg="Test1 X")),  "'{}'".format(output))
+		self.assertTrue(output.endswith(expected_output.format(
+			level='INFO', name="l2", msg="Test1 X")),  "'{}'".format(output))
 		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(level='CRITICAL', name="l2", msg="Test2 X")),  "'{}'".format(output))
+		self.assertTrue(output.endswith(expected_output.format(
+			level='CRITICAL', name="l2", msg="Test2 X")),  "'{}'".format(output))
 
 		if TestStringMethods.log_file_path:
 			log3 = LoggingWrapper("l3", stream=None)
