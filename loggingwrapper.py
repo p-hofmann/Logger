@@ -80,10 +80,10 @@ class LoggingWrapper(object):
 			self._logger.removeHandler(item)
 		if self._label not in LoggingWrapper._map_logfile_handler:
 			return
-		if LoggingWrapper._map_logfile_handler[self._label] is None:
-			return
+
 		logfile_handler = LoggingWrapper._map_logfile_handler.pop(self._label)
-		logfile_handler.close()
+		if logfile_handler is not None:
+			logfile_handler.close()
 
 	def info(self, message):
 		"""
@@ -171,7 +171,11 @@ class LoggingWrapper(object):
 			@return: None
 		"""
 		assert level in self._levelNames
-		self._logger.setLevel(level)
+
+		list_of_handlers = self._logger.handlers
+		for handler in list_of_handlers:
+			handler.setLevel(level)
+		#self._logger.setLevel(level)
 
 	def add_log_stream(self, stream=sys.stderr, level=logging.INFO):
 		"""
