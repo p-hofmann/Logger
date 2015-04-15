@@ -5,7 +5,6 @@ import sys
 import io
 import StringIO
 import logging
-import unittest
 
 
 class LoggingWrapper(object):
@@ -227,70 +226,3 @@ class LoggingWrapper(object):
 		except Exception:
 			sys.stderr.write("[LoggingWrapper] Could not open '{}' for logging\n".format(log_file))
 			return
-
-
-class TestLoggingWrapperMethods(unittest.TestCase):
-	log_file_path = 'test_out_.txt'
-
-	def test_output_stream(self):
-		# TODO: test string for both, stdout and file, then compare
-		expected_output = "{level}: [{name}] {msg}"
-
-		if not hasattr(sys.stdout, "getvalue"):
-			self.fail("need to run in buffered mode")
-
-		log1 = LoggingWrapper("l1", stream=sys.stdout)
-		if TestLoggingWrapperMethods.log_file_path:
-			log1.set_log_file(TestLoggingWrapperMethods.log_file_path)
-
-		log1.info("Test1")
-
-		log2 = LoggingWrapper("l2", stream=sys.stdout)
-		if TestLoggingWrapperMethods.log_file_path:
-			log2.set_log_file(TestLoggingWrapperMethods.log_file_path, 'a')
-
-		log2.info("Test1")
-
-		log2x = LoggingWrapper("l2", stream=sys.stdout)
-		log2x.info("Test1 X")
-
-		log2x.set_level(logging.CRITICAL)
-		log2x.critical("Test2 X")
-
-		log2.close()
-		log2x.close()
-
-		sys.stdout.seek(0)
-		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(
-			level='INFO', name="l1", msg="Test1")), "'{}'".format(output))
-		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(
-			level='INFO', name="l2", msg="Test1")),  "'{}'".format(output))
-		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(
-			level='INFO', name="l2", msg="Test1 X")),  "'{}'".format(output))
-		output = sys.stdout.readline().strip()
-		self.assertTrue(output.endswith(expected_output.format(
-			level='CRITICAL', name="l2", msg="Test2 X")),  "'{}'".format(output))
-
-		if TestLoggingWrapperMethods.log_file_path:
-			log3 = LoggingWrapper("l3", stream=None)
-			with open(TestLoggingWrapperMethods.log_file_path, 'a') as log_file_handle:
-				log3.set_log_file(log_file_handle)
-				log3.info("Test1")
-				list_of_methods = [log3.info, log3.debug, log3.warning, log3.error, log3.info, log3.critical]
-				count = 2
-				for methods in list_of_methods:
-					methods("Test{}".format(count))
-					count += 1
-				try:
-					raise TypeError("Test{}".format(count))
-				except TypeError:
-					log3.exception("Test{}".format(count))
-			log3.close()
-
-
-if __name__ == '__main__':
-	suite = unittest.TestLoader().loadTestsFromTestCase(TestLoggingWrapperMethods)
-	unittest.TextTestRunner(verbosity=2, buffer=True).run(suite)
