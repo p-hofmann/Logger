@@ -39,7 +39,8 @@ class FilePathLoggingWrapper(DefaultLogginWrapper):
 	def tearDown(self):
 		self.log.close()
 		self.log = None
-		os.remove(FilePathLoggingWrapper.log_file_path)
+		if os.path.exists(FilePathLoggingWrapper.log_file_path):
+			os.remove(FilePathLoggingWrapper.log_file_path)
 
 
 class FileStreamLoggingWrapper(DefaultLogginWrapper):
