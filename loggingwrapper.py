@@ -1,5 +1,5 @@
 __author__ = 'hofmann'
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 import sys
 import io
@@ -61,6 +61,9 @@ class LoggingWrapper(object):
 
 	def __enter__(self):
 		return self
+
+	def get_label(self):
+		return self._label
 
 	def close(self):
 		"""
