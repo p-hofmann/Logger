@@ -8,6 +8,14 @@ import logging
 
 
 class LoggingWrapper(object):
+	CRITICAL = logging.CRITICAL
+	FATAL = logging.CRITICAL
+	ERROR = logging.ERROR
+	WARNING = logging.WARNING
+	WARN = logging.WARN
+	INFO = logging.INFO
+	DEBUG = logging.DEBUG
+	NOTSET = logging.NOTSET
 
 	_levelNames = logging._levelNames
 	_map_logfile_handler = dict()
@@ -201,7 +209,7 @@ class LoggingWrapper(object):
 			@return: None
 			@rtype: None
 		"""
-		assert stream is None or self._is_stream(stream)
+		assert self._is_stream(stream)
 		# assert isinstance(stream, (file, io.FileIO))
 		assert level in self._levelNames
 
@@ -217,7 +225,7 @@ class LoggingWrapper(object):
 			@attention: file stream will only be closed if a file path is given!
 
 			@param log_file: file stream or file path of logfile
-			@type log_file: file or FileIO or basestring
+			@type log_file: file | FileIO | StringIO | basestring
 			@param mode: opening mode for logfile, if a file path is given
 			@type mode: basestring
 			@param level: minimum level of messages to be logged
@@ -226,7 +234,7 @@ class LoggingWrapper(object):
 			@return: None
 			@rtype: None
 		"""
-		assert isinstance(log_file, (basestring, file, io.FileIO))
+		assert isinstance(log_file, basestring) or self._is_stream(log_file)
 		assert level in self._levelNames
 
 		if LoggingWrapper._map_logfile_handler[self._label] is not None:
