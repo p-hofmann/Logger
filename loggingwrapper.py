@@ -27,7 +27,7 @@ class LoggingWrapper(object):
 			@param date_format: "%Y-%m-%d %H:%M:%S"
 			@type date_format: basestring
 			@param stream: To have no output at all, use "stream=None", stderr by default
-			@type stream: file or FileIO or None
+			@type stream: file | FileIO | StringIO | None
 
 			@return: None
 		"""
@@ -35,7 +35,7 @@ class LoggingWrapper(object):
 		assert isinstance(verbose, bool)
 		assert message_format is None or isinstance(message_format, basestring)
 		assert message_format is None or isinstance(date_format, basestring)
-		assert stream is None or isinstance(stream, (file, io.FileIO, StringIO.StringIO)) or stream.__class__ is StringIO.StringIO
+		assert stream is None or self._is_stream(stream)
 
 		if message_format is None:
 			message_format = "%(asctime)s %(levelname)s: [%(name)s] %(message)s"
@@ -61,6 +61,10 @@ class LoggingWrapper(object):
 
 	def __enter__(self):
 		return self
+
+	@staticmethod
+	def _is_stream(stream):
+		return isinstance(stream, (file, io.FileIO, StringIO.StringIO)) or stream.__class__ is StringIO.StringIO
 
 	def get_label(self):
 		return self._label
@@ -175,20 +179,19 @@ class LoggingWrapper(object):
 		list_of_handlers = self._logger.handlers
 		for handler in list_of_handlers:
 			handler.setLevel(level)
-		#self._logger.setLevel(level)
 
 	def add_log_stream(self, stream=sys.stderr, level=logging.INFO):
 		"""
 			Add a stream where messages are outputted to.
 
 			@param stream: stderr/stdout or a file stream
-			@type stream: file or FileIO
+			@type stream: file | FileIO | StringIO
 			@param level: minimum level of messages to be logged
-			@type level: int or long
+			@type level: int | long
 
 			@return: None
 		"""
-		assert isinstance(stream, (file, io.FileIO, StringIO.StringIO)) or stream.__class__ is StringIO.StringIO
+		assert stream is None or self._is_stream(stream)
 		# assert isinstance(stream, (file, io.FileIO))
 		assert level in self._levelNames
 
