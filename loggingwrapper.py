@@ -30,6 +30,7 @@ class LoggingWrapper(object):
 			@type stream: file | FileIO | StringIO | None
 
 			@return: None
+			@rtype: None
 		"""
 		assert isinstance(label, basestring)
 		assert isinstance(verbose, bool)
@@ -78,6 +79,7 @@ class LoggingWrapper(object):
 			If given as stream, logfiles will be kept open!
 
 			@return: None
+			@rtype: None
 		"""
 		list_of_handlers = list(self._logger.handlers)
 		for item in list_of_handlers:
@@ -97,6 +99,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.info(message)
 
@@ -108,6 +111,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.error(message)
 
@@ -119,6 +123,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.debug(message)
 
@@ -130,6 +135,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.critical(message)
 
@@ -143,6 +149,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.exception(message)
 
@@ -154,6 +161,7 @@ class LoggingWrapper(object):
 			@type message: basestring
 
 			@return: None
+			@rtype: None
 		"""
 		self._logger.warning(message)
 
@@ -173,6 +181,7 @@ class LoggingWrapper(object):
 			@type level: int or long
 
 			@return: None
+			@rtype: None
 		"""
 		assert level in self._levelNames
 
@@ -190,6 +199,7 @@ class LoggingWrapper(object):
 			@type level: int | long
 
 			@return: None
+			@rtype: None
 		"""
 		assert stream is None or self._is_stream(stream)
 		# assert isinstance(stream, (file, io.FileIO))
@@ -214,6 +224,7 @@ class LoggingWrapper(object):
 			@type level: int or long
 
 			@return: None
+			@rtype: None
 		"""
 		assert isinstance(log_file, (basestring, file, io.FileIO))
 		assert level in self._levelNames
