@@ -1,5 +1,5 @@
 __author__ = 'hofmann'
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 import sys
 import io
@@ -242,7 +242,7 @@ class LoggingWrapper(object):
 			LoggingWrapper._map_logfile_handler[self._label].close()
 			LoggingWrapper._map_logfile_handler[self._label] = None
 
-		if isinstance(log_file, (file, io.FileIO)):
+		if self._is_stream(log_file):
 			self.add_log_stream(stream=log_file, level=level)
 			return
 
