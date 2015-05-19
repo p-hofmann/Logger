@@ -18,7 +18,6 @@ class StdErrLoggingWrapper(DefaultLogginWrapper):
 		self.log = LoggingWrapper("StdErrLog", stream=sys.stderr)
 
 	def tearDown(self):
-		self.log.close()
 		self.log = None
 
 
@@ -27,7 +26,6 @@ class StdOutLoggingWrapper(DefaultLogginWrapper):
 		self.log = LoggingWrapper("StdOutLog", stream=sys.stdout)
 
 	def tearDown(self):
-		self.log.close()
 		self.log = None
 
 
@@ -37,7 +35,6 @@ class FilePathLoggingWrapper(DefaultLogginWrapper):
 		self.log.set_log_file(FilePathLoggingWrapper.log_file_path)
 
 	def tearDown(self):
-		self.log.close()
 		self.log = None
 		if os.path.exists(FilePathLoggingWrapper.log_file_path):
 			os.remove(FilePathLoggingWrapper.log_file_path)
@@ -50,9 +47,8 @@ class FileStreamLoggingWrapper(DefaultLogginWrapper):
 		self.log.set_log_file(self.file_stream)
 
 	def tearDown(self):
-		self.log.close()
 		self.log = None
-		self.file_stream.close()
+		self.file_stream._close()
 		self.file_stream = None
 		if os.path.exists(FilePathLoggingWrapper.log_file_path):
 			os.remove(FilePathLoggingWrapper.log_file_path)
@@ -84,7 +80,7 @@ class TestSameLabelStdErrLoggingWrapper(StdErrLoggingWrapper):
 
 		output = sys.stderr.readline().strip()
 		self.assertEquals(output, "")
-		self.log2.close()
+		self.log2._close()
 
 
 class TestStdErrOutputLoggingWrapperMethods(StdErrLoggingWrapper):
@@ -111,6 +107,9 @@ class TestStdErrOutputLoggingWrapperMethods(StdErrLoggingWrapper):
 			self.assertTrue(output.endswith(expected_output.format(
 				level=msg, name=self.log.get_label(), msg=msg)), "output: '{}' != '{}'".format(output, msg))
 
+	def test_logger_using_with(self):
+		with LoggingWrapper("With Logger", stream=sys.stderr) as with_logger:
+			with_logger.info("test")
 		# if TestLoggingWrapperMethods.log_file_path:
 		# 	log3 = LoggingWrapper("l3", stream=None)
 		# 	with open(TestLoggingWrapperMethods.log_file_path, 'a') as log_file_handle:
