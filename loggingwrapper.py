@@ -1,5 +1,5 @@
 __author__ = 'hofmann'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 import sys
 import io
@@ -264,7 +264,7 @@ class DefaultLogging(object):
 
 	_label = "Logging"
 
-	def __init__(self, logfile=None, verbose=False):
+	def __init__(self, logfile=None, verbose=False, debug=False):
 		"""
 			Prototype class for any class needing a logger
 
@@ -278,9 +278,14 @@ class DefaultLogging(object):
 			@return: None
 			@rtype: None
 		"""
+		assert isinstance(debug, bool)
 		self._logger = LoggingWrapper(self._label, verbose=verbose)
 		if logfile:
 			self._logger.set_log_file(logfile)
+
+		self._debug = debug
+		if debug:
+			self._logger.set_level(self._logger.DEBUG)
 
 		self._logfile = None
 		if isinstance(logfile, basestring):
