@@ -274,6 +274,8 @@ class DefaultLogging(object):
 			@type logfile: file | FileIO | StringIO | basestring
 			@param verbose: Not verbose means that only warnings and errors will be past to stream
 			@type verbose: bool
+			@param debug: Display debug messages
+			@type debug: bool
 
 			@return: None
 			@rtype: None
