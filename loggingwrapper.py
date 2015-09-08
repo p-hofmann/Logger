@@ -308,7 +308,7 @@ class DefaultLogging(object):
 	def _close(self):
 		self._logger = None
 
-	def set_level(self, verbose, debug):
+	def set_log_level(self, verbose, debug):
 		if debug:
 			self._logger.set_level(self._logger.DEBUG)
 		elif verbose:
