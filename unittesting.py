@@ -88,7 +88,7 @@ class TestStdErrOutputLoggingWrapperMethods(StdErrLoggingWrapper):
 		if not hasattr(sys.stderr, "getvalue"):
 			self.fail("Buffered mode required!")
 
-		self.log.set_level(logging.DEBUG)
+		self.log.set_log_level(logging.DEBUG)
 
 		expected_output = TestStdErrOutputLoggingWrapperMethods._expected_output_format
 		messages = [
