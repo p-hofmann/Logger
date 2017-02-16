@@ -9,6 +9,7 @@ from io import StringIO
 
 logger = logging.getLogger(__name__)
 
+
 class LoggingWrapper(object):
     CRITICAL = logging.CRITICAL
     FATAL = logging.CRITICAL
@@ -287,9 +288,7 @@ class LoggingWrapper(object):
 
 class DefaultLogging(object):
 
-    _label = "Logging"
-
-    def __init__(self, logfile=None, verbose=False, debug=False):
+    def __init__(self, label="DefaultLogging", logfile=None, verbose=False, debug=False):
         """
         Prototype class for any class needing a logger
 
@@ -307,7 +306,7 @@ class DefaultLogging(object):
         """
         assert isinstance(debug, bool)
 
-        self._logger = LoggingWrapper(self._label, verbose=verbose)
+        self._logger = LoggingWrapper(label, verbose=verbose)
         if logfile:
             self._logger.set_log_file(logfile, mode='a')
 
