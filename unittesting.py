@@ -1,96 +1,82 @@
 __author__ = 'hofmann'
 
-import sys
 import logging
 import unittest
 import os
 from loggingwrapper import LoggingWrapper
+from cStringIO import StringIO
+
+
+test_stream = StringIO()
 
 
 class DefaultLogginWrapper(unittest.TestCase):
+    """
+    @type log: LoggingWrapper
+    """
     _expected_output_format = "{level}: [{name}] {msg}"
     log_file_path = 'unittest_out.log'
     log_file_path2 = 'unittest_out2.log'
 
+    def __init__(self, methodName='runTest'):
+        super(DefaultLogginWrapper, self).__init__(methodName)
+        self.log = LoggingWrapper("", stream=None)
 
-class StdErrLoggingWrapper(DefaultLogginWrapper):
+
+class StreamLoggingWrapper(DefaultLogginWrapper):
     def setUp(self):
-        self.log = LoggingWrapper("StdErrLog", stream=sys.stderr)
+        test_stream.reset()
+        self.log = LoggingWrapper("StdErrLog", stream=test_stream)
 
     def tearDown(self):
-        self.log = None
-
-
-class StdOutLoggingWrapper(DefaultLogginWrapper):
-    def setUp(self):
-        self.log = LoggingWrapper("StdOutLog", stream=sys.stdout)
-
-    def tearDown(self):
+        test_stream.reset()
         self.log = None
 
 
 class FilePathLoggingWrapper(DefaultLogginWrapper):
     def setUp(self):
         self.log = LoggingWrapper("FilePathLog", stream=None)
-        self.log.set_log_file(FilePathLoggingWrapper.log_file_path)
+        self.file_handler = self.log.set_logfile(FilePathLoggingWrapper.log_file_path)
 
     def tearDown(self):
         self.log = None
-        if os.path.exists(FilePathLoggingWrapper.log_file_path):
-            os.remove(FilePathLoggingWrapper.log_file_path)
-
-
-class FileStreamLoggingWrapper(DefaultLogginWrapper):
-    def setUp(self):
-        self.file_stream = open(FilePathLoggingWrapper.log_file_path, 'a')
-        self.log = LoggingWrapper("FileStreamLog", stream=None)
-        self.log.set_log_file(self.file_stream)
-
-    def tearDown(self):
-        self.log = None
-        self.file_stream._close()
-        self.file_stream = None
+        self.file_handler.close()
         if os.path.exists(FilePathLoggingWrapper.log_file_path):
             os.remove(FilePathLoggingWrapper.log_file_path)
 
 
 class FilePathSetLogFileLoggingWrapper(FilePathLoggingWrapper):
     def runTest(self):
-        self.log.set_log_file(FilePathSetLogFileLoggingWrapper.log_file_path2)
+        self.assertIsNotNone(self.log.set_logfile(FilePathSetLogFileLoggingWrapper.log_file_path2))
+        self.assertEquals(len(self.log._logger.handlers), 1)
 
 
-class TestSameLabelStdErrLoggingWrapper(StdErrLoggingWrapper):
+class TestSameLabelStreamLoggingWrapper(StreamLoggingWrapper):
     def runTest(self):
-        if not hasattr(sys.stderr, "getvalue"):
-            self.fail("Buffered mode required!")
-
         label = self.log.get_label()
-        self.log2 = LoggingWrapper(label, stream=sys.stderr)
+        self.log2 = LoggingWrapper(label, stream=test_stream)
         self.log.info("log")
         self.log2.info("log2")
+        self.assertEquals(len(self.log._logger.handlers), 1)
 
-        sys.stderr.seek(0)
-        output = sys.stderr.readline().strip()
-        self.assertTrue(output.endswith(TestSameLabelStdErrLoggingWrapper._expected_output_format.format(
+        test_stream.seek(0)
+        output = test_stream.readline().strip()
+        self.assertTrue(output.endswith(TestSameLabelStreamLoggingWrapper._expected_output_format.format(
             level='INFO', name=self.log.get_label(), msg="log")), "'{}'".format(output))
 
-        output = sys.stderr.readline().strip()
-        self.assertTrue(output.endswith(TestSameLabelStdErrLoggingWrapper._expected_output_format.format(
+        output = test_stream.readline().strip()
+        self.assertTrue(output.endswith(TestSameLabelStreamLoggingWrapper._expected_output_format.format(
             level='INFO', name=self.log2.get_label(), msg="log2")),  "'{}'".format(output))
 
-        output = sys.stderr.readline().strip()
+        output = test_stream.readline().strip()
         self.assertEquals(output, "")
-        self.log2._close()
 
 
-class TestStdErrOutputLoggingWrapperMethods(StdErrLoggingWrapper):
+class TestStreamOutputLoggingWrapperMethods(StreamLoggingWrapper):
     def runTest(self):
-        if not hasattr(sys.stderr, "getvalue"):
-            self.fail("Buffered mode required!")
+        self.log.set_level(logging.DEBUG)
 
-        self.log.set_log_level(logging.DEBUG)
-
-        expected_output = TestStdErrOutputLoggingWrapperMethods._expected_output_format
+        expected_output = TestStreamOutputLoggingWrapperMethods._expected_output_format
         messages = [
             (self.log.critical, "CRITICAL"),
             (self.log.error, "ERROR"),
@@ -98,39 +84,24 @@ class TestStdErrOutputLoggingWrapperMethods(StdErrLoggingWrapper):
             (self.log.info, "INFO"),
             (self.log.debug, "DEBUG"),
             ]
+
+        test_stream.seek(0)
         for method, msg in messages:
             method(msg)
+        self.assertEquals(len(self.log._logger.handlers), 1)
 
-        sys.stderr.seek(0)
+        test_stream.seek(0)
         for method, msg in messages:
-            output = sys.stderr.readline().strip()
-            self.assertTrue(output.endswith(expected_output.format(
-                level=msg, name=self.log.get_label(), msg=msg)), "output: '{}' != '{}'".format(output, msg))
-
-    def test_logger_using_with(self):
-        with LoggingWrapper("With Logger", stream=sys.stderr) as with_logger:
-            with_logger.info("test")
-        # if TestLoggingWrapperMethods.log_file_path:
-        #     log3 = LoggingWrapper("l3", stream=None)
-        #     with open(TestLoggingWrapperMethods.log_file_path, 'a') as log_file_handle:
-        #         log3.set_log_file(log_file_handle)
-        #         log3.info("Test1")
-        #         list_of_methods = [log3.info, log3.debug, log3.warning, log3.error, log3.info, log3.critical]
-        #         count = 2
-        #         for methods in list_of_methods:
-        #             methods("Test{}".format(count))
-        #             count += 1
-        #         try:
-        #             raise TypeError("Test{}".format(count))
-        #         except TypeError:
-        #             log3.exception("Test{}".format(count))
-        #     log3.close()
+            output = test_stream.readline().strip()
+            self.assertTrue(
+                output.endswith(expected_output.format(level=msg, name=self.log.get_label(), msg=msg)),
+                "output: '{}' != '{}'".format(output, msg))
 
 
 if __name__ == '__main__':
     # TODO: test for logfile output then compare
     suite0 = unittest.TestLoader().loadTestsFromTestCase(FilePathSetLogFileLoggingWrapper)
-    suite1 = unittest.TestLoader().loadTestsFromTestCase(TestSameLabelStdErrLoggingWrapper)
-    suite2 = unittest.TestLoader().loadTestsFromTestCase(TestStdErrOutputLoggingWrapperMethods)
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(TestSameLabelStreamLoggingWrapper)
+    suite2 = unittest.TestLoader().loadTestsFromTestCase(TestStreamOutputLoggingWrapperMethods)
     alltests = unittest.TestSuite([suite0, suite1, suite2])
-    unittest.TextTestRunner(verbosity=2, buffer=True).run(alltests)
+    unittest.TextTestRunner(verbosity=2).run(alltests)
