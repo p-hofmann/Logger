@@ -43,6 +43,8 @@ class FilePathLoggingWrapper(DefaultLogginWrapper):
         self.file_handler.close()
         if os.path.exists(FilePathLoggingWrapper.log_file_path):
             os.remove(FilePathLoggingWrapper.log_file_path)
+        if os.path.exists(FilePathLoggingWrapper.log_file_path2):
+            os.remove(FilePathLoggingWrapper.log_file_path2)
 
 
 class FilePathSetLogFileLoggingWrapper(FilePathLoggingWrapper):
