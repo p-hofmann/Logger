@@ -273,7 +273,7 @@ class DefaultLogging(object):
 
         self._logger = LoggingWrapper(label, verbose=verbose)
         if logfile:
-            self._logger.set_logfile(logfile, mode='a')
+            self._logfile_handler = self._logger.set_logfile(logfile, mode='a')
 
         self._debug = debug
         if debug:
@@ -294,6 +294,9 @@ class DefaultLogging(object):
 
     def _close(self):
         self._logger = None
+
+    def close_filestream(self):
+        self._logfile_handler.close()
 
     def set_log_level(self, verbose, debug):
         """
