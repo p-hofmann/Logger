@@ -4,7 +4,7 @@ import logging
 import unittest
 import os
 from loggingwrapper import LoggingWrapper
-from io import StringIO
+from cStringIO import StringIO
 
 
 test_stream = StringIO()
