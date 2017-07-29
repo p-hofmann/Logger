@@ -115,7 +115,7 @@ class LoggingWrapper(object):
         @return: None
         @rtype: logging.FileHandler | None
         """
-        assert isinstance(file_path, str)
+        assert isinstance(file_path, str), "Logfile must be a file path."
         assert level in self._levelNames
 
         for handler in self._logger.handlers:
